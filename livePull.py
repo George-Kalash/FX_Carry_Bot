@@ -11,7 +11,7 @@ RESET = '\033[0m'
 color = RESET
 SHOULD_PRINT_BARS = False
 
-barAggregator = BarAggregator(interval_seconds=60)
+barAggregator = BarAggregator(interval_seconds=5)
 
 latest = {}
 last_seen = {}
@@ -61,6 +61,10 @@ def on_message(msg):
 
   prev = last_seen.get(symbol)
 
+  if len(barAggregator.bars) > 26:
+    macd, signal, hist = compute_macd(barAggregator.bars)
+    print(f"MACD: {macd:.5f}, Signal: {signal:.5f}, Hist: {hist:.5f}")
+
   if prev is None or prev["price"] != price or prev["time"] != ts:
     last_seen[symbol] = msg
     # print(last_seen[symbol])
@@ -72,7 +76,7 @@ async def live_data_stream(ticker_symbol, callback):
     
 
 async def main():
-  ticker_symbol = "MU"
+  ticker_symbol = "EVTV"
     
   stream_task = asyncio.create_task(live_data_stream(ticker_symbol, on_message))
 
