@@ -1,0 +1,85 @@
+import asyncio
+import yfinance as yf
+from barAggregator import BarAggregator
+from MACD import compute_macd
+from datetime import datetime, timezone
+
+RED = '\033[91m'
+GREEN = '\033[92m'
+RESET = '\033[0m'
+color = RESET
+SHOULD_PRINT_BARS = True
+
+barAggregator = BarAggregator(interval_seconds=5)
+
+latest = {}
+last_seen = {}
+latest_completed_bar = None
+
+def on_message(msg):
+  symbol = msg["id"]
+  price = msg["price"]
+  ts = msg["time"]
+  
+  barAggregator.update(price, int(ts))
+
+
+  if barAggregator.current_bar:
+    bucket_time = datetime.fromtimestamp(
+      barAggregator.current_bar["bucket"], 
+      tz=timezone.utc
+    )
+    # color coding
+    if barAggregator.current_bar["close"] >= barAggregator.current_bar["open"]:
+      color = GREEN
+    else:
+      color = RED
+    
+    if SHOULD_PRINT_BARS: 
+      print(f"[{bucket_time}] O:{barAggregator.current_bar['open']:.2f} "
+          f"H:{barAggregator.current_bar['high']:.2f} "
+          f"L:{barAggregator.current_bar['low']:.2f} "
+          f"C:{color}{barAggregator.current_bar['close']:.2f}{RESET}")
+  
+  if len(barAggregator.bars) > 0:
+    
+    global latest_completed_bar
+    if latest_completed_bar == None or latest_completed_bar != barAggregator.bars[-1]:
+      latest_completed_bar = barAggregator.bars[-1] 
+      # color coding
+      if latest_completed_bar["close"] >= latest_completed_bar["open"]: 
+        color = GREEN
+      else:
+        color = RED
+      print(f"Latest completed bar: {color}{latest_completed_bar}{RESET}")
+
+  prev = last_seen.get(symbol)
+
+  if prev is None or prev["price"] != price or prev["time"] != ts:
+    last_seen[symbol] = msg
+    # print(last_seen[symbol])
+
+async def live_data_stream(ticker_symbol, callback):
+  async with yf.AsyncWebSocket() as ws:
+    await ws.subscribe([ticker_symbol])
+    await ws.listen(callback)
+    
+
+async def main():
+  ticker_symbol = "MU"
+    
+  stream_task = asyncio.create_task(live_data_stream(ticker_symbol, on_message))
+
+  try:
+    while True:
+        
+        # print(f"Latest data for {ticker_symbol}: {latest[ticker_symbol]}")
+      await asyncio.sleep(1)
+  except KeyboardInterrupt:
+    print("\nStopping stream...")
+  finally:
+    stream_task.cancel()
+  
+      
+
+asyncio.run(main())
