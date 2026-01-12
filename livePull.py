@@ -3,14 +3,15 @@ import yfinance as yf
 from barAggregator import BarAggregator
 from MACD import compute_macd
 from datetime import datetime, timezone
+import os
 
 RED = '\033[91m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
 color = RESET
-SHOULD_PRINT_BARS = True
+SHOULD_PRINT_BARS = False
 
-barAggregator = BarAggregator(interval_seconds=5)
+barAggregator = BarAggregator(interval_seconds=60)
 
 latest = {}
 last_seen = {}
@@ -52,6 +53,11 @@ def on_message(msg):
       else:
         color = RED
       print(f"Latest completed bar: {color}{latest_completed_bar}{RESET}")
+      try: 
+        with open(f"log_{symbol}.txt", "a") as f:
+          f.write(f"{latest_completed_bar}\n")
+      except Exception as e:
+        print(f"Error writing to log file: {e}")
 
   prev = last_seen.get(symbol)
 
