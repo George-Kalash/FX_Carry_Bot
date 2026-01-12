@@ -1,7 +1,5 @@
 
 
-
-
 class TradingBot:
     def __init__(self, name, initial_balance):
         self.name = name

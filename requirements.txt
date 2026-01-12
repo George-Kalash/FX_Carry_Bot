@@ -1,3 +1,5 @@
 yfinance
 
 asyncio
+
+pandas
