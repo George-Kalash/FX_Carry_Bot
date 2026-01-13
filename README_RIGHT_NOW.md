@@ -1,4 +1,4 @@
-# FX Carry Bot - What's Going On Right Now
+# Stocks Bot - What's Going On Right Now
 
 ## 🎯 Project Overview
 
