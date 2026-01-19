@@ -1,6 +1,5 @@
 yfinance
-
+yahooquery
 asyncio
-
 pandas
-
+datetime

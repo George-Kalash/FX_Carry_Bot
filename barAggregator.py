@@ -5,7 +5,7 @@ class BarAggregator:
   def __init__(self, interval_seconds=60):
     self.interval = interval_seconds
     self.current_bar = None
-    self.bars = deque(maxlen=500)
+    self.bars = deque(maxlen=1000)
 
   def update(self, price: float, ts_ms: int):
     ts = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)

@@ -21,7 +21,7 @@ def compute_ema200(bars):
 
 
 
-macd_logs = []   #will stores previous MACD values
+macd_logs = []   # will store previous MACD values
 
 
 

@@ -98,7 +98,7 @@ def on_message(msg):
         "hist": hist
     }
     macd_logs.append(macd_log)
-    # write macd to file
+    # writes macd to file
     try: 
       with open(f"logs/macd_{symbol}", "a") as f:
         f.write(f"{macd_log}\n")
